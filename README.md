@@ -10,4 +10,5 @@ Technologies used:
 - [CallRoulette](https://github.com/saghul/CallRoulette): A WebRTC demo using Python (asyncio + aiohttp) as the backend
 - [k8s](https://kubernetes.io/): An open-source system for automating deployment, scaling, and management of containerized applications.
 
-You can find further information about the project in the [documentation section](docs/readme.html).
+You can find further information about the project in the
+[documentation section](http://www.juandebravo.com/webrtc-demo-tid).
