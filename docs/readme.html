@@ -34,8 +34,97 @@ class: center, middle
 1. How to deploy a P2P video chat in the cloud with ease
 
 ---
+# What is WebRTC?
 
-# Introduction
+---
+## Who defines it?
+
+- **W3C**: World Wide Web Consortium
+  It defines the APIs needed for JavaScript web applications to
+  interact with the browser RTC capabilities.
+  e.g. RTCPeerConnection, getUserMedia, etc.
+
+- **IETF**: Internet Engineering Task Force
+  It defines the protocols that should be used by the browser
+  RTC engine to talk to another WebRTC capable endpoint (either
+  another browser or another node).
+  e.g. SDP, ICE, FEC, etc.
+
+---
+## Capabilities
+
+- Audio communications (1:1 or group)
+- Video communications (1:1 or group)
+- Data communications (screen share, file transfer, messaging, gaming, etc)
+
+---
+## Media
+  - Capture (localStream)
+  - Transmission
+  - Negotiation via Offer/Answer: SDP
+    - codecs / codecs parameters
+    - media types
+    - media multiplexing
+    - helpers in RTCPeerConnection to generate them
+    - onnegotiationneeded
+  - Media path
+    NAT
+    STUN (Session Traversal Utilities for NAT)
+    TURN (Traversal Using Relay around NAT)
+    ICE (Interactive Connectivity Establishment)
+      - NIC (Network Interface Cards): host candidates
+      - STUN: server reflexive candidates
+      - TURN: relay candidates
+    Trickle ICE
+  - Security
+
+---
+## Browser native APIs (W3C)
+
+- MediaStreamTrack
+- MediaStream
+  - each getUserMedia call generates a local MediaStream object
+  - each MediaStream instance has a unique identifier
+- RTCPeerConnection: set up media and data connection paths between
+  two browsers
+    - JSEP: JavaScript Session Establishment Protocol
+- getUserMedia
+- RTCSessionDescription
+- RTCIceCandidates
+
+---
+## Fine tune the media
+- getUserMedia constraints
+- SDP munge
+
+---
+## Current support
+
+- Browsers 1/2 (Chrome & Firefox)
+
+- Browsers 2/2 (Edge & Safari)
+
+- Native SDKs
+
+---
+## WebRTC & ORTC
+
+---
+
+# What is NOT WebRTC?
+
+- Signalling
+  * Transport Layer
+    - HTTP (polling, long polling, HTTP/2)
+    - WebSockets
+    - DataChannels
+  * Protocol
+    - SIP
+    - Jingle
+    - Proprietary
+  *
+
+---
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
