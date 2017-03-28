@@ -56,7 +56,7 @@ class: center, middle
 
 [Preliminar version open sourced by Google in May 2011](https://www.theregister.co.uk/2011/06/01/google_open_sources_webrtc/).
 
-[Our very own anarchyco talking about WebRTC in 2012](http://www.rtcbits.com/2012/10/webrtc-facts-and-lies.html).
+[Our very own @anarchyco talking about WebRTC in 2012](http://www.rtcbits.com/2012/10/webrtc-facts-and-lies.html).
 ---
 ## Who is working on the standarization effort?
 
@@ -157,6 +157,7 @@ More info about simulcast and Scalable Video Coding (SVC)
   Obtain a single local MediaStream (a.k.a. localStream).
 
   ```js
+  let constraints = {audio: false, video: true};
   navigator.mediaDevices.getUserMedia(constraints).
     then(handleSuccess).catch(handleError);
   ```
@@ -165,20 +166,113 @@ More info about simulcast and Scalable Video Coding (SVC)
 
   [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/gum/js/main.js)
 
+  [More info about getUserMedia API](https://www.w3.org/TR/mediacapture-streams/)
+
 ---
-## Media. PeerConnection
-  Helps to set up a media/data session between two peers.
+## Media. Set up PeerConnection
+  Used for setting up a media and data connection path between two peers.
   Encapsulates everything related to media negotiation, connectivity
   and security.
 
+  ```js
+  let config = {iceServers: [{url: 'stun:stun.l.google.com:19302'}]};
+  let pc = new RTCPeerConnection(config);
+  ```
+
+  [Demo](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+  [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/pc1/js/main.js)
+
+  [More info about RTCPeerConnection API](https://www.w3.org/TR/webrtc/#rtcpeerconnection-interface)
+
 ---
-  - Transmission
-  - Negotiation via Offer/Answer: SDP
-    - codecs / codecs parameters
+## Media. Attach Media
+  Once you have the PeerConnection, it's important to add your local
+  stream to it.
+
+  ```js
+  // let localStream be the stream captured via getUserMedia
+  pc.addStream(localStream);
+  ```
+  [Demo](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+  [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/pc1/js/main.js)
+
+  [More info about RTCPeerConnection addStream](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream).
+
+  Note: addStream is deprecated, but [Chrome did not implement addTrack method
+  yet](https://bugs.chromium.org/p/chromium/issues/detail?id=642712)
+---
+## Media. Create an Offer
+  WebRTC uses [**SDP protocol**](https://en.wikipedia.org/wiki/Session_Description_Protocol)
+  for media negotiation, following the offer/answer scheme.
+
+  RTCPeerConnection includes **helpers** to generate SDP offer/answer.
+
+  ```js
+  var offer;
+  pc.createOffer().then((desc) => offer = desc);
+  ```
+  It includes...
+---
+## Media. Create an Offer
+  ... it includes:
+
+  - descriptions of the **media** added to the PeerConnection instance
+  - **codec/RTP/RTCP** options supported by the browser implementation
+  - **Media multiplexing** as supported
+  - **candidates** already gathered by the ICE agent (if any)
+
+---
+## Media. Include SDP in the PeerConnection
+  Here you have the opportunity to **munge the SDP** offer created by the browser.
+
+  ```js
+  // `myOffer` is an updated version of `offer`, obtained via
+  // pc.createOffer
+  pc.setLocalDescription(myOffer);
+  ```
+
+  _setLocalDescription_ indirectly controls the candidate gathering process.
+
+  [SDP munge example](https://webrtc.github.io/samples/src/content/peerconnection/munge-sdp/)
+---
+## Media. Destination Side
+  After receiving an offer via a signalling path...
+
+  - Create a _PeerConnection_ instance
+  - Include the offer in the PeerConnection using _setRemoteDescription_ method
+  - Use _createAnswer_ method for generating an SDP answer
+  - Include the answer in the PeerConnection using _setLocalDescription_ method
+  - Send back the answer using the signalling path
+---
+## Example E2E, same browser
+
+  [Launch this example](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+  and check [chrome://webrtc-internals](chrome://webrtc-internals) info
+---
+## Call Roulette
+
+  > A WebRTC demo using Python (asyncio + aiohttp) as the backend
+
+  ![Yo protocol](images/yo-callroulette.jpg)
+
+  [Project](https://github.com/saghul/CallRoulette) by [@saghul](https://twitter.com/saghul)
+
+
+---
+  <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ Thanks! ~~<br/>
+             @juandebravo
+  </div>
+---
+---
+Backup.
+## Media. Att
     - media types
     - media multiplexing
-    - helpers in RTCPeerConnection to generate them
+    -
     - onnegotiationneeded
+
   - Media path
     NAT
     STUN (Session Traversal Utilities for NAT)
@@ -197,8 +291,7 @@ More info about simulcast and Scalable Video Coding (SVC)
 - MediaStream
   - each getUserMedia call generates a local MediaStream object
   - each MediaStream instance has a unique identifier
-- RTCPeerConnection: set up media and data connection paths between
-  two browsers
+- RTCPeerConnection:
     - JSEP: JavaScript Session Establishment Protocol
 - getUserMedia
 - RTCSessionDescription
