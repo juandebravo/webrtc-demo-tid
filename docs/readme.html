@@ -8,10 +8,26 @@
       @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-      body { font-family: 'Droid Serif'; }
+      body {
+        font-family: 'Droid Serif', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-size: 25px;
+        line-height: 1.5;
+        word-wrap: break-word;
+      }
       h1, h2, h3 {
         font-family: 'Yanone Kaffeesatz';
         font-weight: normal;
+      }
+
+      .remark-slide-content {
+        font-size: 25px;
+      }
+
+      blockquote {
+        padding: 0 1em;
+        color: #6a737d;
+        border-left: 0.25em solid #dfe2e5;
+        margin: 0 1em;
       }
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
     </style>
@@ -36,30 +52,126 @@ class: center, middle
 ---
 # What is WebRTC?
 
----
-## Who defines it?
+> WebRTC is a free, open project that provides browsers and mobile applications with Real-Time Communications (RTC) capabilities via simple APIs. The WebRTC components have been optimized to best serve this purpose.
 
-- **W3C**: World Wide Web Consortium
-  It defines the APIs needed for JavaScript web applications to
+[Preliminar version open sourced by Google in May 2011](https://www.theregister.co.uk/2011/06/01/google_open_sources_webrtc/).
+
+[Our very own anarchyco talking about WebRTC in 2012](http://www.rtcbits.com/2012/10/webrtc-facts-and-lies.html).
+---
+## Who is working on the standarization effort?
+
+***
+- **W3C**: World Wide Web Consortium.<br/>
+  It defines the **APIs** needed for JavaScript web applications to
   interact with the browser RTC capabilities.
   e.g. RTCPeerConnection, getUserMedia, etc.
 
-- **IETF**: Internet Engineering Task Force
-  It defines the protocols that should be used by the browser
-  RTC engine to talk to another WebRTC capable endpoint (either
+***
+- **IETF**: Internet Engineering Task Force.<br/>
+  It defines the **protocols** that should be used by the RTC engine
+  embedded in the browser to talk to another WebRTC capable endpoint (either
   another browser or another node).
   e.g. SDP, ICE, FEC, etc.
+***
 
 ---
 ## Capabilities
 
-- Audio communications (1:1 or group)
-- Video communications (1:1 or group)
-- Data communications (screen share, file transfer, messaging, gaming, etc)
+- Audio communications
+  - 1:1
+  - group
+- Video communications
+  - 1:1
+  - group
+- Data communications
+  - screen sharing
+  - file transfer
+  - messaging
+  - gaming
+  - etc.
+---
+
+# What is NOT WebRTC?
+
+**Signalling**: application should choose both the transport layer
+  and the transport protocol for endpoints to be able to setup a
+  media/data connection.
+
+  * _Transport Layer_
+    - HTTP (polling, pushing -comet/long polling-)
+    - WebSockets
+    - DataChannels
+  * _Protocol_
+    - [SIP](https://en.wikipedia.org/wiki/Session_Initiation_Protocol)
+    - [Jingle](https://goo.gl/B4h8sk)
+    - Proprietary (build your own protocol)
+---
+# Let's go through some architecture examples for a WebRTC application
+---
+# Simple Architecture
+![Simple WebRTC Architecture](images/WebRTC_Trapezoid.jpeg)
+
+<p style="font-size: 0.5em">
+https://www.safaribooksonline.com/library/view/real-time-communication-with/9781449371869/ch01.html
+</p>
+---
+# Interconnectivity with SIP
+
+![WebRTC - SIP architecture](images/WebRTC-SIP.jpg)
+---
+# Multi-party sessions architecture
+
+[Three main alternatives](https://webrtchacks.com/webrtc-beyond-one-one/)
+for building an architecture to support multi-party realtime communications.
+---
+# Mesh architecture
+![Mesh architecture](images/mesh.png)
+<p style="font-size: 0.5em">https://webrtchacks.com/webrtc-beyond-one-one/</p>
+- Lowest delay
+- High up-link bandwidth and intensive CPU power
+---
+# Mixer architecture
+![Mixer](images/mixer.png)
+<p style="font-size: 0.5em">https://webrtchacks.com/webrtc-beyond-one-one/</p>
+- **MCU**: Multipoint Control Unit
+- Low intelligence in the endpoints
+- Central point receives and mixes streams
+- High infrastructure costs & extra delay and loss of quality
+---
+# Router architecture
+![Router](images/router.png)
+<p style="font-size: 0.5em">https://webrtchacks.com/webrtc-beyond-one-one/</p>
+- **SFU**: Selective Forwarding Unit
+- Central point receives and forwards streams
+- Endpoints should send *layered video streams*
+
+More info about simulcast and Scalable Video Coding (SVC)
+[here, thanks Oscar Divorra!](https://webrtchacks.com/sfu-simulcast/)
+---
+## How to setup a WebRTC session
+![Setup a webRTC session](images/webrtc-setup.png)
+<p style="font-size: 0.5em">https://www.slideshare.net/bklang/webrtc-overview-by-dan-burnett</p>
 
 ---
-## Media
-  - Capture (localStream)
+## Media. Capture
+  Obtain a single local MediaStream (a.k.a. localStream).
+
+  ```js
+  navigator.mediaDevices.getUserMedia(constraints).
+    then(handleSuccess).catch(handleError);
+  ```
+
+  [Demo](https://webrtc.github.io/samples/src/content/getusermedia/gum/)
+
+  [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/gum/js/main.js)
+
+---
+## Media. PeerConnection
+  Helps to set up a media/data session between two peers.
+  Encapsulates everything related to media negotiation, connectivity
+  and security.
+
+---
   - Transmission
   - Negotiation via Offer/Answer: SDP
     - codecs / codecs parameters
@@ -108,21 +220,6 @@ class: center, middle
 
 ---
 ## WebRTC & ORTC
-
----
-
-# What is NOT WebRTC?
-
-- Signalling
-  * Transport Layer
-    - HTTP (polling, long polling, HTTP/2)
-    - WebSockets
-    - DataChannels
-  * Protocol
-    - SIP
-    - Jingle
-    - Proprietary
-  *
 
 ---
 
