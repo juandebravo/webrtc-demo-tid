@@ -102,11 +102,11 @@ class: center, middle
 ---
 # What is NOT WebRTC?
 
-**Signalling**: application should choose both the transport layer
-  and the transport protocol for endpoints to be able to setup a
-  media/data connection.
+**Signalling**: application should choose both the transport
+  and the protocol for endpoints to exchange the messages
+  required to be able to setup a  media/data connection.
 
-  * _Transport Layer_
+  * _Transport_
     - HTTP (polling, pushing -comet/long polling-)
     - WebSockets
     - DataChannels
@@ -187,7 +187,7 @@ More info about simulcast and Scalable Video Coding (SVC)
   and security.
 
   ```js
-  let config = {iceServers: [{url: 'stun:stun.l.google.com:19302'}]};
+  let config = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
   let pc = new RTCPeerConnection(config);
   ```
 
@@ -215,7 +215,7 @@ More info about simulcast and Scalable Video Coding (SVC)
 ---
 ## Media. Create an Offer
   WebRTC uses [**SDP protocol**](https://en.wikipedia.org/wiki/Session_Description_Protocol)
-  for media negotiation, following the offer/answer scheme.
+  for media negotiation, following the offer/answer model.
 
   RTCPeerConnection includes **helpers** to generate SDP offer/answer.
 
@@ -228,9 +228,11 @@ More info about simulcast and Scalable Video Coding (SVC)
 ## Media. Create an Offer
   ... it includes:
 
-  - descriptions of the **media** added to the PeerConnection instance
-  - **codec/RTP/RTCP** options supported by the browser implementation
-  - **Media multiplexing** as supported
+  - descriptions of the **media streams** added to the PeerConnection instance
+  - **transport** options to decide how many connections to use and how to check the 
+      connectivity
+  - **encoding** and **RTP/RTCP** options supported by the browser implementation
+  - **fingerprints** for the certificates to be used to setup the end to end encription
   - **candidates** already gathered by the ICE agent (if any)
 
 ---
@@ -242,8 +244,6 @@ More info about simulcast and Scalable Video Coding (SVC)
   // pc.createOffer
   pc.setLocalDescription(myOffer);
   ```
-
-  _setLocalDescription_ indirectly controls the candidate gathering process.
 
   [SDP munge example](https://webrtc.github.io/samples/src/content/peerconnection/munge-sdp/)
 ---
