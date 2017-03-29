@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-size: 25px;
+        line-height: 1.5;
+        word-wrap: break-word;
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+
+      .remark-slide-content {
+        font-size: 25px;
+      }
+
+      blockquote {
+        padding: 0 1em;
+        color: #6a737d;
+        border-left: 0.25em solid #dfe2e5;
+        margin: 0 1em;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# WebRTC & k8s.<br/> Two domains that will conquer the world
+
+---
+
+# Agenda
+
+1. What is WebRTC?
+1. What is NOT WebRTC?
+1. How to build a WebRTC service architecture
+1. How to build a P2P video chat
+1. How to deploy a P2P video chat in the cloud with ease
+
+---
+  <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ What is WebRTC? ~~
+  </div>
+---
+# What is WebRTC?
+
+> WebRTC is a free, open project that provides browsers and mobile applications with Real-Time Communications (RTC) capabilities via simple APIs. The WebRTC components have been optimized to best serve this purpose.
+
+[Preliminar version open sourced by Google in May 2011](https://www.theregister.co.uk/2011/06/01/google_open_sources_webrtc/).
+
+[Our very own @anarchyco talking about WebRTC in 2012](http://www.rtcbits.com/2012/10/webrtc-facts-and-lies.html).
+---
+## Who is working on the standarization effort?
+
+***
+- **W3C**: World Wide Web Consortium.<br/>
+  It defines the **APIs** needed for JavaScript web applications to
+  interact with the browser RTC capabilities.
+  e.g. RTCPeerConnection, getUserMedia, etc.
+
+***
+- **IETF**: Internet Engineering Task Force.<br/>
+  It defines the **protocols** that should be used by the RTC engine
+  embedded in the browser to talk to another WebRTC capable endpoint (either
+  another browser or another node).
+  e.g. SDP, ICE, FEC, etc.
+***
+
+---
+## Capabilities
+
+- Audio communications
+  - 1:1
+  - group
+- Video communications
+  - 1:1
+  - group
+- Data communications
+  - screen sharing
+  - file transfer
+  - messaging
+  - gaming
+  - etc.
+---
+  <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ What is NOT WebRTC? ~~
+  </div>
+---
+# What is NOT WebRTC?
+
+**Signalling**: application should choose both the transport layer
+  and the transport protocol for endpoints to be able to setup a
+  media/data connection.
+
+  * _Transport Layer_
+    - HTTP (polling, pushing -comet/long polling-)
+    - WebSockets
+    - DataChannels
+  * _Protocol_
+    - [SIP](https://en.wikipedia.org/wiki/Session_Initiation_Protocol)
+    - [Jingle](https://goo.gl/B4h8sk)
+    - Proprietary (build your own protocol)
+---
+<div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ How to build a WebRTC service architecture ~~
+</div>
+---
+# Simple Architecture
+![Simple WebRTC Architecture](images/WebRTC_Trapezoid.jpeg)
+
+<p style="font-size: 0.5em">
+https://www.safaribooksonline.com/library/view/real-time-communication-with/9781449371869/ch01.html
+</p>
+---
+# Interconnectivity with SIP
+
+![WebRTC - SIP architecture](images/WebRTC-SIP.jpg)
+---
+# Multi-party sessions architecture
+
+[Three main alternatives](https://webrtchacks.com/webrtc-beyond-one-one/)
+for building an architecture to support multi-party realtime communications.
+---
+# Mesh architecture
+![Mesh architecture](images/mesh.png)
+<p style="font-size: 0.5em">https://webrtchacks.com/webrtc-beyond-one-one/</p>
+- Lowest delay
+- High up-link bandwidth and intensive CPU power
+---
+# Mixer architecture
+![Mixer](images/mixer.png)
+<p style="font-size: 0.5em">https://webrtchacks.com/webrtc-beyond-one-one/</p>
+- **MCU**: Multipoint Control Unit
+- Low intelligence in the endpoints
+- Central point receives and mixes streams
+- High infrastructure costs & extra delay and loss of quality
+---
+# Router architecture
+![Router](images/router.png)
+<p style="font-size: 0.5em">https://webrtchacks.com/webrtc-beyond-one-one/</p>
+- **SFU**: Selective Forwarding Unit
+- Central point receives and forwards streams
+- Endpoints should send *layered video streams*
+
+More info about simulcast and Scalable Video Coding (SVC)
+[here, thanks Oscar Divorra!](https://webrtchacks.com/sfu-simulcast/)
+---
+## How to setup a WebRTC session
+![Setup a webRTC session](images/webrtc-setup.png)
+<p style="font-size: 0.5em">https://www.slideshare.net/bklang/webrtc-overview-by-dan-burnett</p>
+
+---
+## Media. Capture
+  Obtain a single local MediaStream (a.k.a. localStream).
+
+  ```js
+  let constraints = {audio: false, video: true};
+  navigator.mediaDevices.getUserMedia(constraints).
+    then(handleSuccess).catch(handleError);
+  ```
+
+  [Demo](https://webrtc.github.io/samples/src/content/getusermedia/gum/)
+
+  [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/getusermedia/gum/js/main.js)
+
+  [More info about getUserMedia API](https://www.w3.org/TR/mediacapture-streams/)
+
+---
+## Media. Set up PeerConnection
+  Used for setting up a media and data connection path between two peers.
+  Encapsulates everything related to media negotiation, connectivity
+  and security.
+
+  ```js
+  let config = {iceServers: [{url: 'stun:stun.l.google.com:19302'}]};
+  let pc = new RTCPeerConnection(config);
+  ```
+
+  [Demo](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+  [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/pc1/js/main.js)
+
+  [More info about RTCPeerConnection API](https://www.w3.org/TR/webrtc/#rtcpeerconnection-interface)
+
+---
+## Media. Attach Media
+  Once you have the PeerConnection, it's important to add your local
+  stream to it.
+
+  ```js
+  // let localStream be the stream captured via getUserMedia
+  pc.addStream(localStream);
+  ```
+  [Demo](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+  [JS source code](https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/pc1/js/main.js)
+
+  [More info about RTCPeerConnection addStream](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream).
+
+  Note: addStream is deprecated, but [Chrome did not implement addTrack method
+  yet](https://bugs.chromium.org/p/chromium/issues/detail?id=642712)
+---
+## Media. Create an Offer
+  WebRTC uses [**SDP protocol**](https://en.wikipedia.org/wiki/Session_Description_Protocol)
+  for media negotiation, following the offer/answer scheme.
+
+  RTCPeerConnection includes **helpers** to generate SDP offer/answer.
+
+  ```js
+  var offer;
+  pc.createOffer().then((desc) => offer = desc);
+  ```
+  It includes...
+---
+## Media. Create an Offer
+  ... it includes:
+
+  - descriptions of the **media** added to the PeerConnection instance
+  - **codec/RTP/RTCP** options supported by the browser implementation
+  - **Media multiplexing** as supported
+  - **candidates** already gathered by the ICE agent (if any)
+
+---
+## Media. Include SDP in the PeerConnection
+  Here you have the opportunity to **munge the SDP** offer created by the browser.
+
+  ```js
+  // `myOffer` is an updated version of `offer`, obtained via
+  // pc.createOffer
+  pc.setLocalDescription(myOffer);
+  ```
+
+  _setLocalDescription_ indirectly controls the candidate gathering process.
+
+  [SDP munge example](https://webrtc.github.io/samples/src/content/peerconnection/munge-sdp/)
+---
+## Media. Destination Side
+  After receiving an offer via a signalling path...
+
+  - Create a _PeerConnection_ instance
+  - Include the offer in the PeerConnection using _setRemoteDescription_ method
+  - Use _createAnswer_ method for generating an SDP answer
+  - Include the answer in the PeerConnection using _setLocalDescription_ method
+  - Send back the answer using the signalling path
+---
+## Example E2E, same browser
+
+  [Launch this example](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+  and check [chrome://webrtc-internals](chrome://webrtc-internals) info
+---
+<div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+    ~~ How to build a P2P video chat ~~
+</div>
+---
+## Call Roulette
+
+  > A WebRTC demo using Python (asyncio + aiohttp) as the backend
+
+  ![Yo protocol](images/yo-callroulette.jpg)
+
+  [Project](https://github.com/saghul/CallRoulette) by [@saghul](https://twitter.com/saghul)
+---
+<div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+    ~~ How to deploy a P2P video chat in the cloud with ease ~~
+</div>
+---
+## Kubernetes!
+> Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.
+
+![Kubernetes architecture](images/kubernetes-arch.jpg)
+---
+## Deploy Call Roulette using Kubernetes in Google Cloud Engine
+
+- Containerize your application
+- Have some local fun with [minikube](https://github.com/kubernetes/minikube)
+- Deploy the solution locally
+- Create an [account in GCE](https://cloud.google.com/compute/docs/access/user-accounts/)
+- Create a [cluster in GCE](https://console.cloud.google.com/kubernetes/list)
+- Deploy the solution in GCE (using _[kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/)_ command)
+---
+  <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ Thanks! ~~<br/>
+             @juandebravo
+  </div>
+---
+---
+TODO (yet).
+## Media. Att
+    - media types
+    - media multiplexing
+    -
+    - onnegotiationneeded
+
+  - Media path
+    NAT
+    STUN (Session Traversal Utilities for NAT)
+    TURN (Traversal Using Relay around NAT)
+    ICE (Interactive Connectivity Establishment)
+      - NIC (Network Interface Cards): host candidates
+      - STUN: server reflexive candidates
+      - TURN: relay candidates
+    Trickle ICE
+  - Security
+
+---
+## Browser native APIs (W3C)
+
+- MediaStreamTrack
+- MediaStream
+  - each getUserMedia call generates a local MediaStream object
+  - each MediaStream instance has a unique identifier
+- RTCPeerConnection:
+    - JSEP: JavaScript Session Establishment Protocol
+- getUserMedia
+- RTCSessionDescription
+- RTCIceCandidates
+
+---
+## Fine tune the media
+- getUserMedia constraints
+- SDP munge
+
+---
+## Current support
+
+- Browsers 1/2 (Chrome & Firefox)
+
+- Browsers 2/2 (Edge & Safari)
+
+- Native SDKs
+
+---
+## WebRTC & ORTC
+
+---
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
