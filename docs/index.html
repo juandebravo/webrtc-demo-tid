@@ -45,10 +45,15 @@ class: center, middle
 
 1. What is WebRTC?
 1. What is NOT WebRTC?
-1. Why does this talk mention Kubernetes?
+1. How to build a WebRTC service architecture
 1. How to build a P2P video chat
 1. How to deploy a P2P video chat in the cloud with ease
 
+---
+  <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ What is WebRTC? ~~
+  </div>
 ---
 # What is WebRTC?
 
@@ -90,7 +95,11 @@ class: center, middle
   - gaming
   - etc.
 ---
-
+  <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ What is NOT WebRTC? ~~
+  </div>
+---
 # What is NOT WebRTC?
 
 **Signalling**: application should choose both the transport layer
@@ -106,7 +115,10 @@ class: center, middle
     - [Jingle](https://goo.gl/B4h8sk)
     - Proprietary (build your own protocol)
 ---
-# Let's go through some architecture examples for a WebRTC application
+<div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+             ~~ How to build a WebRTC service architecture ~~
+</div>
 ---
 # Simple Architecture
 ![Simple WebRTC Architecture](images/WebRTC_Trapezoid.jpeg)
@@ -249,6 +261,11 @@ More info about simulcast and Scalable Video Coding (SVC)
   [Launch this example](https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
   and check [chrome://webrtc-internals](chrome://webrtc-internals) info
 ---
+<div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+    ~~ How to build a P2P video chat ~~
+</div>
+---
 ## Call Roulette
 
   > A WebRTC demo using Python (asyncio + aiohttp) as the backend
@@ -256,8 +273,25 @@ More info about simulcast and Scalable Video Coding (SVC)
   ![Yo protocol](images/yo-callroulette.jpg)
 
   [Project](https://github.com/saghul/CallRoulette) by [@saghul](https://twitter.com/saghul)
+---
+<div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
+             transform: translateX(-50%) translateY(-50%);">
+    ~~ How to deploy a P2P video chat in the cloud with ease ~~
+</div>
+---
+## Kubernetes!
+> Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.
 
+![Kubernetes architecture](images/kubernetes-arch.jpg)
+---
+## Deploy Call Roulette using Kubernetes in Google Cloud Engine
 
+- Containerize your application
+- Have some local fun with [minikube](https://github.com/kubernetes/minikube)
+- Deploy the solution locally
+- Create an [account in GCE](https://cloud.google.com/compute/docs/access/user-accounts/)
+- Create a [cluster in GCE](https://console.cloud.google.com/kubernetes/list)
+- Deploy the solution in GCE (using _[kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/)_ command)
 ---
   <div style="font-weight: bold; position: absolute; top: 50%; left: 50%;
              transform: translateX(-50%) translateY(-50%);">
